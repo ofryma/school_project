@@ -12,8 +12,8 @@ session = Session()
 
 Base = declarative_base()
 
-class Batch(Base):
-    __tablename__ = "baches"
+# class Batch(Base):
+#     __tablename__ = "baches"
 
 class CellData(Base):
     __tablename__ = "celldata"
@@ -27,7 +27,7 @@ class CellData(Base):
     original_location = Column(String)
     last_transaction = Column(DateTime , default=datetime.now())
     file_metadata = Column(JSON)
-    cluster = Column(String , ForeignKey("clusters.id"))
+    
 
     def __repr__(self):
         return "<File(name='%s', creation date='%s')>" % (
