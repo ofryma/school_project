@@ -3,13 +3,16 @@ from database import *
 import pandas as pd
 import numpy as np
 import matplotlib
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-datafile_url = os.getcwd() + "/all.txt"
+
 
 def read_our_csv(csv_url : str) -> any:
     
-    with open(datafile_url , "r") as datafile:
+    with open(csv_url , "r") as datafile:
         txt = datafile.read()
         txt_lines = txt.split("\n")
 
@@ -47,5 +50,21 @@ def read_our_csv(csv_url : str) -> any:
         df = pd.DataFrame().from_dict(data_dict)
         return df
 
-print(read_our_csv(datafile_url))
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+@app.get("/table/")
+async def get_example_csv():
+    datafile_url = os.getcwd() + "/all.txt"
+    return read_our_csv(datafile_url)
+
+@app.post("/updatedb/")
+async def update_db():
+    pass
+
+
+
+
+
 
