@@ -2,3 +2,5 @@ SQLAlchemy==1.4.44
 numpy
 pandas
 matplotlib
+fastapi
+uvicorn

@@ -3,13 +3,15 @@ from database import *
 import pandas as pd
 import numpy as np
 import matplotlib
+from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI
 
+app = FastAPI()
 
-datafile_url = os.getcwd() + "/all.txt"
 
 def read_our_csv(csv_url : str) -> any:
     
-    with open(datafile_url , "r") as datafile:
+    with open(csv_url , "r") as datafile:
         txt = datafile.read()
         txt_lines = txt.split("\n")
 
@@ -47,5 +49,38 @@ def read_our_csv(csv_url : str) -> any:
         df = pd.DataFrame().from_dict(data_dict)
         return df
 
-print(read_our_csv(datafile_url))
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.get("/table/")
+async def get_example_csv():
+    datafile_url = os.getcwd() + "/all.txt"
+    return read_our_csv(datafile_url)
+
+
+def insert_data_to_db(csv_path: str , batch_number : int):
+    data = read_our_csv(csv_path)
+    cell_data_list = []
+
+    for i in range(len(data[list(data.keys())[0]])):
+        cell_data_list.append(CellData(
+            src_filename = data["filename"][i],
+            batch_number = batch_number,
+            Voc = data["Uoc,mV"][i],
+            FF = data["FF,%"][i],
+            Eff = data["Eff,%"][i],
+            cellarea = data["cellarea"][i]
+        ))
+    session.add_all(cell_data_list)
+
+    session.commit()
+
+
+insert_data_to_db("./all.txt" , 4)
+
+
+
+
 
