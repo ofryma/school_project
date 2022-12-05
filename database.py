@@ -32,6 +32,9 @@ class Batch(Base):
     Encap_in_GB = Column(Integer , nullable=True)
     UV_glue = Column(Integer , nullable=True)
     Boom_epoxy = Column(Integer , nullable=True)
+    applied_presure = Column(Integer , nullable = True)
+    extra_notes = Column(String , nullable = True)
+
 
 class FileLog(Base):
     __tablename__ = "file_logs"
@@ -52,7 +55,7 @@ class CellData(Base):
     FF = Column(Float , nullable = True)
     Eff = Column(Float , nullable = True)
     cellarea = Column(Float , nullable = True)
-
+    extra_notes = Column(String , nullable = True)
 
 ###############
 # BASE MODELS #
@@ -65,8 +68,6 @@ class DataFileCreate(BaseModel):
     FF : List[float]
     Eff : List[float] 
     cellarea : List[float]
-
-
 
 class BatchCreate(BaseModel):
     batch_number : int
@@ -124,5 +125,4 @@ class BatchResponse(BaseModel):
         return session.query(Batch).get(id)
 
 
-    
 Base.metadata.create_all(engine)
