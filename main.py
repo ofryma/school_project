@@ -3,6 +3,7 @@ from database import *
 import pandas as pd
 import numpy as np
 import matplotlib
+from typing import List , Any
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -54,16 +55,59 @@ def read_our_csv(csv_url : str) -> any:
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "API is up and running"}
 
-@app.get("/table/")
-async def get_example_csv():
-    datafile_url = os.getcwd() + "/all.txt"
-    return read_our_csv(datafile_url)
 
-@app.post("/updatedb/")
-async def update_db():
-    pass
+@app.post("/batch/new")
+async def create_new_batch(
+    data : BatchCreate
+):
+    return data.create()
+
+@app.get("/batch/{id}")
+async def read_item(id: int):
+    
+    return BatchResponse().recive(id)
+
+@app.post("/datafile/upload/{batch_number}")
+async def upload_dataframe(
+    data: DataFileCreate,
+    batch_number : int
+):
+
+    for i in range(len(data.filename)):
+        session.add(CellData(
+            src_filename = data.filename[i] ,
+            batch_number = batch_number,
+            Uoc = data.Uoc[i],
+            FF = data.FF[i],
+            Eff = data.Eff[i],
+            Jsc = data.Jsc[i],
+            cellarea = data.cellarea[i]
+        ))
+        session.commit()
+    
+
+
+
+    return "Hello"
+
+
+@app.post("/celldata")
+async def create_list_of_cell_data(
+    data: List[CellDataCreate]
+):
+    for cell in data:
+        if BatchResponse().recive(cell.batch_number) == None:
+            session.add(Batch(
+                batch_number = cell.batch_number
+            ))
+            session.commit()
+            
+
+        cell.create()
+
+    
 
 
 
