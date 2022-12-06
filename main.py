@@ -101,12 +101,52 @@ def insert_data(data: dict , batch_number : int):
         session.commit()
 
 
+##############
+# BATCH      #
+##############
 
-@app.get("/")
-async def root():
-    return {"message": "API is up and running"}
 
-@app.post("/datafile/upload-txt/{batch_number}")
+@app.get("/batch/{id}" , tags=["Batch"])
+async def read_item(id: int):
+    
+    return BatchResponse().recive(id)
+
+@app.post("/batch/new" , tags=["Batch"])
+async def create_new_batch(
+    data : BatchCreate
+):
+    data.create()
+    return {"Success" : f"New batch created" , "batch_data" : data}
+
+@app.put("/batch/update/{batch_number}" , tags=["Batch"])
+def update_object(batch_number: int, obj_data: BatchCreate):
+    obj = session.query(Batch).filter(Batch.batch_number == batch_number).first()
+    if obj is None:
+        return {"Error" : "Could not find this batch number in the database"}
+    else:
+        obj = obj_data.update(obj)
+        session.commit()
+        return {"Success" : f"Batch number {batch_number} was updated"}
+
+@app.delete("/batch/{batch_number}" , tags=["Batch"])
+def delete_record(batch_number: int):
+    
+
+    session.query(CellData).filter(CellData.batch_number == batch_number).delete()
+    session.query(Batch).filter(Batch.batch_number == batch_number).delete()
+    session.commit()
+    
+    return {"message": "Record deleted successfully"}
+
+    
+
+
+##############
+# DATAFILES  #
+##############
+
+
+@app.post("/datafile/upload-txt/{batch_number}" , tags=["Data files"])
 async def create_file(
     batch_number : int,
     file: bytes = File(),
@@ -120,41 +160,43 @@ async def create_file(
 
     return data
 
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile):
-    # this route will be able to later upload the file to S3
-    return {"filename": file.filename}
 
-@app.post("/batch/new")
-async def create_new_batch(
-    data : BatchCreate
-):
-    return data.create()
+# @app.post("/uploadfile/")
+# async def create_upload_file(file: UploadFile):
+#     # this route will be able to later upload the file to S3
+#     return {"filename": file.filename}
 
-@app.get("/batch/{id}")
-async def read_item(id: int):
+
+# @app.post("/datafile/upload/{csv_url}/{batch_number}")
+# async def upload_read_from_csv(
+#     csv_url: str,
+#     batch_number: int
+# ):
+#     data = read_our_csv(csv_url)
+#     insert_data(data , batch_number)
+
+# @app.post("/datafile/upload/{batch_number}")
+# async def upload_dataframe(
+#     data: DataFileCreate,
+#     batch_number : int
+# ):
+
+#     insert_data(data)
+
+#     return "Hello"
+
+
+
+##############
+# CELLDATA   #
+##############
+
+@app.get("/celldata" , tags=["Cell Data"])
+async def get_all_cells():
     
-    return BatchResponse().recive(id)
+    return session.query(CellData).all()
 
-@app.post("/datafile/upload/{csv_url}/{batch_number}")
-async def upload_read_from_csv(
-    csv_url: str,
-    batch_number: int
-):
-    data = read_our_csv(csv_url)
-    insert_data(data , batch_number)
-
-@app.post("/datafile/upload/{batch_number}")
-async def upload_dataframe(
-    data: DataFileCreate,
-    batch_number : int
-):
-
-    insert_data(data)
-
-    return "Hello"
-
-@app.post("/celldata")
+@app.post("/celldata" , tags=["Cell Data"])
 async def create_list_of_cell_data(
     data: List[CellDataCreate]
 ):
@@ -168,9 +210,14 @@ async def create_list_of_cell_data(
 
         cell.create()
 
-    
 
 
+
+
+
+@app.get("/" , tags=["Tests"])
+async def root():
+    return {"message": "API is up and running"}
 
 
 

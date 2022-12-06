@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
@@ -6,7 +8,11 @@ from pydantic import BaseModel
 
 from datetime import datetime
 from typing import List
-engine = create_engine("sqlite:///memory.db" , echo=True)
+
+
+db_url = "sqlite:///memory.db"
+
+engine = create_engine(db_url , echo=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -82,23 +88,55 @@ class BatchCreate(BaseModel):
     Encap_in_GB : int
     UV_glue : int
     Boom_epoxy : int
+    applied_presure : int
+    extra_notes : str
+
 
     def create(self):
-        session.add(Batch(
-            batch_number = self.batch_number,
-            prod_date  = self.prod_date,
-            BL_TiCl4_sol = self.BL_TiCl4_sol,
-            BL_c_TiO2  = self.BL_c_TiO2,
-            ETL_mTiO2 = self.ETL_mTiO2,
-            HTL_Spiro = self.HTL_Spiro,
-            HTL_CUSCN = self.HTL_CUSCN,
-            Electrode_Au = self.Electrode_Au,
-            Electrode_C  = self.Electrode_C,
-            Encap_in_GB = self.Encap_in_GB,
-            UV_glue = self.UV_glue,
-            Boom_epoxy = self.Boom_epoxy,
-        ))
-        return session.commit()
+
+        obj = session.query(Batch).filter(Batch.batch_number == self.batch_number).first()
+        if obj == None:
+
+            session.add(Batch(
+                batch_number = self.batch_number,
+                prod_date  = self.prod_date,
+                BL_TiCl4_sol = self.BL_TiCl4_sol,
+                BL_c_TiO2  = self.BL_c_TiO2,
+                ETL_mTiO2 = self.ETL_mTiO2,
+                HTL_Spiro = self.HTL_Spiro,
+                HTL_CUSCN = self.HTL_CUSCN,
+                Electrode_Au = self.Electrode_Au,
+                Electrode_C  = self.Electrode_C,
+                Encap_in_GB = self.Encap_in_GB,
+                UV_glue = self.UV_glue,
+                Boom_epoxy = self.Boom_epoxy,
+                applied_presure = self.applied_presure,
+                extra_notes = self.extra_notes,
+                
+            ))
+            return session.commit()
+        else:
+            return {"Error" : "This batch is already exists"}
+
+    def update(self , obj):
+        
+        obj.prod_date  = self.prod_date
+        obj.BL_TiCl4_sol = self.BL_TiCl4_sol
+        obj.BL_c_TiO2  = self.BL_c_TiO2
+        obj.ETL_mTiO2 = self.ETL_mTiO2
+        obj.HTL_Spiro = self.HTL_Spiro
+        obj.HTL_CUSCN = self.HTL_CUSCN
+        obj.Electrode_Au = self.Electrode_Au
+        obj.Electrode_C  = self.Electrode_C
+        obj.Encap_in_GB = self.Encap_in_GB
+        obj.UV_glue = self.UV_glue
+        obj.Boom_epoxy = self.Boom_epoxy
+        obj.applied_presure = self.applied_presure
+        obj.extra_notes = self.extra_notes
+
+        return obj
+
+
 
 class CellDataCreate(BaseModel):
     src_filename: str
