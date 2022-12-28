@@ -23,8 +23,6 @@ Base = declarative_base()
 # TABLES      #
 ###############
 
-
-
 class CellData(Base):
     __tablename__ = "celldata"
 
@@ -32,50 +30,57 @@ class CellData(Base):
     src_filename = Column(String)   
     batch_number = Column(Integer)
     prod_date = Column(DateTime , default=datetime.now())
-    before_encap = Column(Boolean , default=True)
-    Jsc = Column(Float , nullable = True)
-    Uoc = Column(Float , nullable = True)
-    FF = Column(Float , nullable = True)
-    Eff = Column(Float , nullable = True)
+    
+    Jsc_before = Column(Float , nullable = True)
+    Uoc_before = Column(Float , nullable = True)
+    FF_before = Column(Float , nullable = True)
+    Eff_before = Column(Float , nullable = True)
+    
+    Jsc_after = Column(Float , nullable = True)
+    Uoc_after = Column(Float , nullable = True)
+    FF_after = Column(Float , nullable = True)
+    Eff_after = Column(Float , nullable = True)
+    
     device_area = Column(Float , nullable = True)
-    device_transperacy = Column(Integer)
-    number_of_layers = Column(Integer)
-    Substrate_material = Column(String)
+
+    device_transperacy = Column(Integer , nullable=True)
+    number_of_layers = Column(Integer , nullable=True)
+    Substrate_material = Column(String , nullable=True)
 
     # Layer 1
-    l1_function = Column(String)
-    l1_material = Column(String)
-    l1_fabrication_method = Column(String)
-    l1_thickness = Column(Float)
+    l1_function = Column(String , nullable=True)
+    l1_material = Column(String , nullable=True)
+    l1_fabrication_method = Column(String , nullable=True)
+    l1_thickness = Column(Float , nullable=True)
     l1_prod_date = Column(DateTime , nullable=True , default=datetime.now())
 
     # Layer 2
-    l2_function = Column(String)
-    l2_material = Column(String)
-    l2_fabrication_method = Column(String)
-    l2_thickness = Column(Float)
+    l2_function = Column(String , nullable=True)
+    l2_material = Column(String , nullable=True)
+    l2_fabrication_method = Column(String , nullable=True)
+    l2_thickness = Column(Float , nullable=True)
     l2_prod_date = Column(DateTime , nullable=True , default=datetime.now())
 
     # Layer 3
     l3_function = Column(String , nullable = True)
-    l3_material = Column(String)
+    l3_material = Column(String , nullable=True)
     l3_fabrication_method = Column(String)
-    l3_thickness = Column(Float)
+    l3_thickness = Column(Float , nullable=True)
     l3_prod_date = Column(DateTime , nullable=True , default=datetime.now())
 
     # Layer 4
-    l4_function = Column(String)
-    l4_material = Column(String)
-    l4_fabrication_method = Column(String)
-    l4_thickness = Column(Float)
+    l4_function = Column(String , nullable=True)
+    l4_material = Column(String , nullable=True)
+    l4_fabrication_method = Column(String , nullable=True)
+    l4_thickness = Column(Float , nullable=True)
     l4_prod_date = Column(DateTime , nullable=True , default=datetime.now())
-    l4_ratio = Column(String)
-    Processing_solvent = Column(String)
-    Additive_1 = Column(String)
-    Additive_1_concentration  = Column(Float)
-    Additive_2   = Column(String)
-    Additive_2_concentration = Column(Float)
-    Active_layer_treatment_from_processing =  Column(String)
+    l4_ratio = Column(String , nullable=True)
+    Processing_solvent = Column(String , nullable=True)
+    Additive_1 = Column(String , nullable=True)
+    Additive_1_concentration  = Column(Float , nullable=True)
+    Additive_2   = Column(String , nullable=True)
+    Additive_2_concentration = Column(Float , nullable=True)
+    Active_layer_treatment_from_processing =  Column(String , nullable=True)
     # Time since solution was prepared
     # Solution concentration
     # Solution temperature
@@ -93,10 +98,10 @@ class CellData(Base):
     # Removal of Antisolvent (if used)
 
     # Layer 5
-    l5_function = Column(String)
-    l5_material = Column(String)
-    l5_fabrication_method = Column(String)
-    l5_thickness = Column(Float)
+    l5_function = Column(String , nullable=True)
+    l5_material = Column(String , nullable=True)
+    l5_fabrication_method = Column(String , nullable=True)
+    l5_thickness = Column(Float , nullable=True)
     l5_prod_date = Column(DateTime , nullable=True , default=datetime.now())
     # Processing solvent
     # Additive 1
@@ -116,10 +121,10 @@ class CellData(Base):
 
 
     # Layer 6
-    l6_function = Column(String)
-    l6_material = Column(String)
-    l6_fabrication_method = Column(String)
-    l6_thickness = Column(Float)
+    l6_function = Column(String , nullable=True)
+    l6_material = Column(String , nullable=True)
+    l6_fabrication_method = Column(String , nullable=True)
+    l6_thickness = Column(Float , nullable=True)
     l6_prod_date = Column(DateTime , nullable=True , default=datetime.now())
     # Growth rate 1
     # Growth rate 2
@@ -145,19 +150,9 @@ class CellData(Base):
     # Boom_epoxy = Column(Integer , nullable=True)
 
 
-
 ###############
 # BASE MODELS #
 ###############
-
-class DataFileCreate(BaseModel):
-    filename : List[str]
-    Uoc : List[float]
-    Jsc : List[float]
-    FF : List[float]
-    Eff : List[float] 
-    cellarea : List[float]
-
 
 
 class CellDataCreate(BaseModel):
