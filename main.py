@@ -106,37 +106,37 @@ def insert_data(data: dict , batch_number : int):
 ##############
 
 
-@app.get("/batch/{id}" , tags=["Batch"])
-async def read_item(id: int):
+# @app.get("/batch/{id}" , tags=["Batch"])
+# async def read_item(id: int):
     
-    return BatchResponse().recive(id)
+#     return BatchResponse().recive(id)
 
-@app.post("/batch/new" , tags=["Batch"])
-async def create_new_batch(
-    data : BatchCreate
-):
-    data.create()
-    return {"Success" : f"New batch created" , "batch_data" : data}
+# @app.post("/batch/new" , tags=["Batch"])
+# async def create_new_batch(
+#     data : BatchCreate
+# ):
+#     data.create()
+#     return {"Success" : f"New batch created" , "batch_data" : data}
 
-@app.put("/batch/update/{batch_number}" , tags=["Batch"])
-def update_object(batch_number: int, obj_data: BatchCreate):
-    obj = session.query(Batch).filter(Batch.batch_number == batch_number).first()
-    if obj is None:
-        return {"Error" : "Could not find this batch number in the database"}
-    else:
-        obj = obj_data.update(obj)
-        session.commit()
-        return {"Success" : f"Batch number {batch_number} was updated"}
+# @app.put("/batch/update/{batch_number}" , tags=["Batch"])
+# def update_object(batch_number: int, obj_data: BatchCreate):
+#     obj = session.query(Batch).filter(Batch.batch_number == batch_number).first()
+#     if obj is None:
+#         return {"Error" : "Could not find this batch number in the database"}
+#     else:
+#         obj = obj_data.update(obj)
+#         session.commit()
+#         return {"Success" : f"Batch number {batch_number} was updated"}
 
-@app.delete("/batch/{batch_number}" , tags=["Batch"])
-def delete_record(batch_number: int):
+# @app.delete("/batch/{batch_number}" , tags=["Batch"])
+# def delete_record(batch_number: int):
     
 
-    session.query(CellData).filter(CellData.batch_number == batch_number).delete()
-    session.query(Batch).filter(Batch.batch_number == batch_number).delete()
-    session.commit()
+#     session.query(CellData).filter(CellData.batch_number == batch_number).delete()
+#     session.query(Batch).filter(Batch.batch_number == batch_number).delete()
+#     session.commit()
     
-    return {"message": "Record deleted successfully"}
+#     return {"message": "Record deleted successfully"}
 
     
 
@@ -151,12 +151,16 @@ async def create_file(
     batch_number : int,
     file: bytes = File(),
     ):
+
+    
+
     data = read_from_txt(file.decode("utf-8"))
-    if session.query(Batch).get(batch_number) == None:
-        session.add(Batch(
-            batch_number = batch_number
-        ))
-    insert_data(data , batch_number)
+
+    # if session.query(Batch).get(batch_number) == None:
+    #     session.add(Batch(
+    #         batch_number = batch_number
+    #     ))
+    # insert_data(data , batch_number)
 
     return data
 
@@ -196,20 +200,23 @@ async def get_all_cells():
     
     return session.query(CellData).all()
 
-@app.post("/celldata" , tags=["Cell Data"])
+@app.post("/celldata/{batch_number}" , tags=["Cell Data"])
 async def create_list_of_cell_data(
-    data: List[CellDataCreate]
+    data: CellDataCreate,
+    batch_number: int,
 ):
-    for cell in data:
-        if BatchResponse().recive(cell.batch_number) == None:
-            session.add(Batch(
-                batch_number = cell.batch_number
-            ))
-            session.commit()
-            
+    
+    session.add(CellData(
+        src_filename = data.src_filename,
+        batch_number = batch_number,
+        Uoc = data.Uoc,
+        FF = data.FF,
+        Eff = data.Eff,
+        Jsc = data.Jsc,
+    ))
+    session.commit()
 
-        cell.create()
-
+    return {"message" : "cell data uploaded"}
 
 
 
