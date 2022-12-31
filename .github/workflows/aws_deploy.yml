@@ -15,13 +15,13 @@ on:
       - main
 
 env:
-  AWS_REGION: ${{ AWS_REGION }}              # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ${{ ECR_REPOSITORY }}                 # set this to your Amazon ECR repository name
-  ECS_SERVICE: ${{ ECS_SERVICE }}                       # set this to your Amazon ECS service name
-  ECS_CLUSTER: ${{ ECS_CLUSTER }}                       # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: ${{ ECS_TASK_DEFINITION }}       # set this to the path to your Amazon ECS task definition
+  AWS_REGION: us-east-1              # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: school-project                # set this to your Amazon ECR repository name
+  ECS_SERVICE: sample-app-service                       # set this to your Amazon ECS service name
+  ECS_CLUSTER: school-project                       # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION: school-project-api-revision1.json       # set this to the path to your Amazon ECS task definition
                                                         # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: ${{ CONTAINER_NAME }}                 # set this to the name of the container in the
+  CONTAINER_NAME: school-project-api               # set this to the name of the container in the
                                                         # containerDefinitions section of your task definition
 
 jobs:
