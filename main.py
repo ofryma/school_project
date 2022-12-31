@@ -209,10 +209,10 @@ async def create_list_of_cell_data(
     session.add(CellData(
         src_filename = data.src_filename,
         batch_number = batch_number,
-        Uoc = data.Uoc,
-        FF = data.FF,
-        Eff = data.Eff,
-        Jsc = data.Jsc,
+        Uoc_before = data.Uoc,
+        FF_before = data.FF,
+        Eff_before = data.Eff,
+        Jsc_before = data.Jsc,
     ))
     session.commit()
 
