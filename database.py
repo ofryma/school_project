@@ -52,28 +52,28 @@ class CellData(Base):
     l1_material = Column(String , nullable=True)
     l1_fabrication_method = Column(String , nullable=True)
     l1_thickness = Column(Float , nullable=True)
-    l1_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l1_prod_date = Column(DateTime , nullable=True)
 
     # Layer 2
     l2_function = Column(String , nullable=True)
     l2_material = Column(String , nullable=True)
     l2_fabrication_method = Column(String , nullable=True)
     l2_thickness = Column(Float , nullable=True)
-    l2_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l2_prod_date = Column(DateTime , nullable=True)
 
     # Layer 3
     l3_function = Column(String , nullable = True)
     l3_material = Column(String , nullable=True)
     l3_fabrication_method = Column(String)
     l3_thickness = Column(Float , nullable=True)
-    l3_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l3_prod_date = Column(DateTime , nullable=True)
 
     # Layer 4
     l4_function = Column(String , nullable=True)
     l4_material = Column(String , nullable=True)
     l4_fabrication_method = Column(String , nullable=True)
     l4_thickness = Column(Float , nullable=True)
-    l4_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l4_prod_date = Column(DateTime , nullable=True)
     l4_ratio = Column(String , nullable=True)
     Processing_solvent = Column(String , nullable=True)
     Additive_1 = Column(String , nullable=True)
@@ -102,7 +102,7 @@ class CellData(Base):
     l5_material = Column(String , nullable=True)
     l5_fabrication_method = Column(String , nullable=True)
     l5_thickness = Column(Float , nullable=True)
-    l5_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l5_prod_date = Column(DateTime , nullable=True)
     # Processing solvent
     # Additive 1
     # Additive 1 concentration
@@ -125,7 +125,7 @@ class CellData(Base):
     l6_material = Column(String , nullable=True)
     l6_fabrication_method = Column(String , nullable=True)
     l6_thickness = Column(Float , nullable=True)
-    l6_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    l6_prod_date = Column(DateTime , nullable=True)
     # Growth rate 1
     # Growth rate 2
     # Base pressure
@@ -138,7 +138,7 @@ class CellData(Base):
 
     # Encap
     
-    encap_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    encap_prod_date = Column(DateTime , nullable=True)
     encap_in_GB = Column(Integer , nullable=True)
     encap_stored_location = Column(String)
     encap_material = Column(String)
@@ -146,33 +146,7 @@ class CellData(Base):
     process_time_interval = Column(DateTime , nullable = True)
     extra_notes = Column(String , nullable = True)
 
-    # UV_glue = Column(Integer , nullable=True)
-    # Boom_epoxy = Column(Integer , nullable=True)
 
 
-###############
-# BASE MODELS #
-###############
-
-
-class CellDataCreate(BaseModel):
-    src_filename: str
-    batch_number: int
-    Uoc : float
-    FF : float
-    Eff : float
-    Jsc: float
-
-    def create(self):
-        session.add(CellData(
-            src_filename = self.src_filename,
-            batch_number = self.batch_number,
-            Uoc = self.Uoc,
-            FF = self.FF,
-            Eff = self.Eff,
-            Jsc = self.Jsc,
-        ))
-        session.commit()
-
-
+# Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)

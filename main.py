@@ -4,141 +4,15 @@ import pandas as pd
 import numpy as np
 import matplotlib
 from typing import List , Any
-from fastapi import FastAPI
+from fastapi import FastAPI , Query , Form
 from fastapi import File, UploadFile
+import uvicorn
 
-app = FastAPI()
-
-
-
-def read_from_txt(txt : str) -> any:
-    
-    txt_lines = txt.split("\n")
-
-    # first line is the headers:
-    txt_lines.pop(0)
-    data_dict = {
-        "filename" : [] ,
-        "Uoc" : [],
-        "Jsc" : [] ,
-        "FF" : [] ,
-        "Eff" : [] ,
-        "cellarea" : []
-    }
-
-    for line in txt_lines:
-        line_list = line.split(" ")
-        if len(line_list) < 6:
-            continue
-        
-        i=0
-        while i < len(line_list):
-            if line_list[i] == "":
-                line_list.pop(i)
-            else:
-                i += 1
+from analyze import *
+from crud import *
 
 
-        data_dict["filename"].append(line_list[0])
-        data_dict["Uoc"].append(line_list[1])
-        data_dict["Jsc"].append(line_list[2])
-        data_dict["FF"].append(line_list[3])
-        data_dict["Eff"].append(line_list[4])
-        data_dict["cellarea"].append(line_list[5])
-    
-    return data_dict
-def read_our_csv(csv_url : str) -> any:
-    
-    with open(csv_url , "r") as datafile:
-        txt = datafile.read()
-    
-    txt_lines = txt.split("\n")
-
-    # first line is the headers:
-    txt_lines.pop(0)
-    data_dict = {
-        "filename" : [] ,
-        "Uoc" : [],
-        "Jsc" : [] ,
-        "FF" : [] ,
-        "Eff" : [] ,
-        "cellarea" : []
-    }
-
-    for line in txt_lines:
-        line_list = line.split(" ")
-        if len(line_list) < 6:
-            continue
-        
-        i=0
-        while i < len(line_list):
-            if line_list[i] == "":
-                line_list.pop(i)
-            else:
-                i += 1
-
-
-        data_dict["filename"].append(line_list[0])
-        data_dict["Uoc"].append(line_list[1])
-        data_dict["Jsc"].append(line_list[2])
-        data_dict["FF"].append(line_list[3])
-        data_dict["Eff"].append(line_list[4])
-        data_dict["cellarea"].append(line_list[5])
-    
-    return data_dict
-def insert_data(data: dict , batch_number : int):
-    
-    for i in range(len(data["filename"])):
-        session.add(CellData(
-            src_filename = data["filename"][i] ,
-            batch_number = batch_number,
-            Uoc = data["Uoc"][i],
-            FF = data["FF"][i],
-            Eff = data["Eff"][i],
-            Jsc = data["Jsc"][i],
-            cellarea = data["cellarea"][i]
-        ))
-        session.commit()
-
-
-##############
-# BATCH      #
-##############
-
-
-# @app.get("/batch/{id}" , tags=["Batch"])
-# async def read_item(id: int):
-    
-#     return BatchResponse().recive(id)
-
-# @app.post("/batch/new" , tags=["Batch"])
-# async def create_new_batch(
-#     data : BatchCreate
-# ):
-#     data.create()
-#     return {"Success" : f"New batch created" , "batch_data" : data}
-
-# @app.put("/batch/update/{batch_number}" , tags=["Batch"])
-# def update_object(batch_number: int, obj_data: BatchCreate):
-#     obj = session.query(Batch).filter(Batch.batch_number == batch_number).first()
-#     if obj is None:
-#         return {"Error" : "Could not find this batch number in the database"}
-#     else:
-#         obj = obj_data.update(obj)
-#         session.commit()
-#         return {"Success" : f"Batch number {batch_number} was updated"}
-
-# @app.delete("/batch/{batch_number}" , tags=["Batch"])
-# def delete_record(batch_number: int):
-    
-
-#     session.query(CellData).filter(CellData.batch_number == batch_number).delete()
-#     session.query(Batch).filter(Batch.batch_number == batch_number).delete()
-#     session.commit()
-    
-#     return {"message": "Record deleted successfully"}
-
-    
+app = FastAPI(title= "School Project")
 
 
 ##############
@@ -146,80 +20,91 @@ def insert_data(data: dict , batch_number : int):
 ##############
 
 
-@app.post("/datafile/upload-txt/{batch_number}" , tags=["Data files"])
+@app.post("/datafile/upload-data/{batch_number}" , tags=["Data files"])
 async def create_file(
     batch_number : int,
-    file: bytes = File(),
+    file_type : str = Query(datafiles_types[0] , enum = datafiles_types),
+    encapsulation_material : str = Query(encapsulation_types[0] , enum = encapsulation_types),
+    encapsulation_status : str = Query("before" , enum = ["before" , "after"]),
+    file: UploadFile = File(...),
+    cellarea : float = 0.09,
+    extra_notes : str = ""
     ):
 
     
+    filename = file.filename
+    data = file.file.read().decode("utf-8")
 
-    data = read_from_txt(file.decode("utf-8"))
+    res = []
 
-    # if session.query(Batch).get(batch_number) == None:
-    #     session.add(Batch(
-    #         batch_number = batch_number
-    #     ))
-    # insert_data(data , batch_number)
+    if file_type == "all":
+        all_file_data = read_from_all_file(data)
+        data_keys = list(all_file_data.keys())
+
+        
+
+        for i in range(len(all_file_data[data_keys[0]])):
+            cur_cell_data = {}
+            cur_cell_data["src_filename"] = all_file_data["filename"][i]
+            cur_cell_data["Jsc"] = all_file_data["Jsc"][i]
+            cur_cell_data["Voc"] = all_file_data["Uoc"][i]
+            cur_cell_data["FF"] = all_file_data["FF"][i]
+            cur_cell_data["Eff"] = all_file_data["Eff"][i]
+            cur_cell_data["cellarea"] = all_file_data["cellarea"][i]
+            
+            cur_cell_data["batch_number"] = batch_number
+            cur_cell_data["encapsulation_status"] = encapsulation_status
+            cur_cell_data["encapsulation_material"] = encapsulation_material
+            cur_cell_data["extra_notes"] = extra_notes
+
+            res.append(cur_cell_data)
+            update_cell_IV_measurement(cur_cell_data)
+
+    elif file_type == "IV mesure":
+        data = get_IV_from_content(data=data)
+        data = analyze_IV(I=data["I"] ,  V=data["V"] , cellarea=cellarea)
+
+        data["src_filename"] = filename
+        data["batch_number"] = batch_number
+        data["encapsulation_status"] = encapsulation_status
+        data["encapsulation_material"] = encapsulation_material
+        data["extra_notes"] = extra_notes
+
+        res.append(data)
+        update_cell_IV_measurement(data)
+
+
+    return res
+
+
+@app.post("/update-batch/{batch_number}" , tags=["Batch"])
+async def update_batch(
+    batch_number : int,
+    encapsulation_material : str = Query(encapsulation_types[0] , enum = encapsulation_types),
+    update_times : bool = False,
+    production_time : datetime = datetime.now(),
+    encapsulation_time : datetime = datetime.now(),
+    extra_notes : str = "",
+    applied_presure : bool = False,
+):
+    
+
+    data = {}
+    data["batch_number"] = batch_number
+    data["encapsulation_material"] = encapsulation_material
+    data["update_times"] = update_times
+    data["encapsulation_time"] = encapsulation_time
+    data["production_time"] = production_time
+    data["extra_notes"] = extra_notes
+    data["applied_presure"] = applied_presure
+    
+    update_batch_params(data)
 
     return data
-
-
-# @app.post("/uploadfile/")
-# async def create_upload_file(file: UploadFile):
-#     # this route will be able to later upload the file to S3
-#     return {"filename": file.filename}
-
-
-# @app.post("/datafile/upload/{csv_url}/{batch_number}")
-# async def upload_read_from_csv(
-#     csv_url: str,
-#     batch_number: int
-# ):
-#     data = read_our_csv(csv_url)
-#     insert_data(data , batch_number)
-
-# @app.post("/datafile/upload/{batch_number}")
-# async def upload_dataframe(
-#     data: DataFileCreate,
-#     batch_number : int
-# ):
-
-#     insert_data(data)
-
-#     return "Hello"
-
-
 
 ##############
 # CELLDATA   #
 ##############
-
-@app.get("/celldata" , tags=["Cell Data"])
-async def get_all_cells():
-    
-    return session.query(CellData).all()
-
-@app.post("/celldata/{batch_number}" , tags=["Cell Data"])
-async def create_list_of_cell_data(
-    data: CellDataCreate,
-    batch_number: int,
-):
-    
-    session.add(CellData(
-        src_filename = data.src_filename,
-        batch_number = batch_number,
-        Uoc_before = data.Uoc,
-        FF_before = data.FF,
-        Eff_before = data.Eff,
-        Jsc_before = data.Jsc,
-    ))
-    session.commit()
-
-    return {"message" : "cell data uploaded"}
-
-
-
 
 
 @app.get("/" , tags=["Tests"])
@@ -229,3 +114,5 @@ async def root():
 
 
 
+if __name__ == '__main__':
+    uvicorn.run("main:app", reload=True)
