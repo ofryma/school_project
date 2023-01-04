@@ -41,6 +41,9 @@
               <div class="col-6">
                 <canvas id="chart2"></canvas>
               </div>
+              <div class="col-6">
+                <canvas id="chart3"></canvas>
+              </div>
             </div>
             <div class="row mt-5">
               <div class="col-6">
@@ -130,6 +133,33 @@
             });
           </script>
           
+
+          <script>
+            var ctx = document.getElementById('chart3').getContext('2d');
+            var chart = new Chart(ctx, {
+              // The type of chart we want to create
+              type: 'line',
+
+              // The data for our dataset
+              data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                  label: 'Layer 1',
+                  backgroundColor: 'rgb(255, 99, 132)',
+                  borderColor: 'rgb(255, 99, 132)',
+                  data: [0, 10, 5, 2, 20, 30, 45]
+                }, {
+                  label: 'Layer 2',
+                  backgroundColor: 'rgb(54, 162, 235)',
+                  borderColor: 'rgb(54, 162, 235)',
+                  data: [20, 15, 10, 5, 25, 40, 30]
+                }]
+              },
+
+              // Configuration options go here
+              options: {}
+            });
+          </script>
 
 
           celldata_table

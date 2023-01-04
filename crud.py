@@ -267,7 +267,6 @@ def get_pixels_is_batch(data : dict) -> list:
         except:
             pixel_dict[b] = 1
         
-    print(pixel_dict)
 
     batch_numbers_list = []
     pixel_for_batch = []
