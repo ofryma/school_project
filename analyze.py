@@ -1,9 +1,9 @@
 
 
 encapsulation_types = ["Boom" , "UV glue"]
-
+layers = [1,2,3,4,5,6]
 datafiles_types = ["all" , "IV mesure" , "xlsx"]
-
+layers_functions = ["first" , "second"]
 
 def convert_to_num(number : str) -> float:
     base_num , ten_pow = number.split("E")

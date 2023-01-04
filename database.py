@@ -147,6 +147,5 @@ class CellData(Base):
     extra_notes = Column(String , nullable = True)
 
 
-
 # Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)

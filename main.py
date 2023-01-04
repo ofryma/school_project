@@ -7,17 +7,15 @@ from typing import List , Any
 from fastapi import FastAPI , Query , Form
 from fastapi import File, UploadFile
 import uvicorn
+from pydantic import BaseModel
 
 from analyze import *
 from crud import *
 
 
-app = FastAPI(title= "School Project")
-
-
-##############
-# DATAFILES  #
-##############
+app = FastAPI(
+    title= "School Project"
+    )
 
 
 @app.post("/datafile/upload-data/{batch_number}" , tags=["Data files"])
@@ -28,7 +26,8 @@ async def create_file(
     encapsulation_status : str = Query("before" , enum = ["before" , "after"]),
     file: UploadFile = File(...),
     cellarea : float = 0.09,
-    extra_notes : str = ""
+    extra_notes : str = "",
+    
     ):
 
     
@@ -76,16 +75,18 @@ async def create_file(
 
     return res
 
-
-@app.post("/update-batch/{batch_number}" , tags=["Batch"])
-async def update_batch(
+@app.post("/update-batch/config/{batch_number}" , tags=["Batch"])
+async def update_batch_configurations(
     batch_number : int,
     encapsulation_material : str = Query(encapsulation_types[0] , enum = encapsulation_types),
     update_times : bool = False,
     production_time : datetime = datetime.now(),
     encapsulation_time : datetime = datetime.now(),
+    encapsulation_in_GB : bool = False,
+    encapsulation_stored_location : str = "",
     extra_notes : str = "",
     applied_presure : bool = False,
+
 ):
     
 
@@ -95,6 +96,8 @@ async def update_batch(
     data["update_times"] = update_times
     data["encapsulation_time"] = encapsulation_time
     data["production_time"] = production_time
+    data["encapsulation_in_GB"] = encapsulation_in_GB
+    data["encapsulation_stored_location"] = encapsulation_stored_location
     data["extra_notes"] = extra_notes
     data["applied_presure"] = applied_presure
     
@@ -102,16 +105,15 @@ async def update_batch(
 
     return data
 
-##############
-# CELLDATA   #
-##############
-
-
 @app.get("/" , tags=["Tests"])
 async def root():
     return {"message": "API is up and running"}
 
-
+@app.get("/celldata/get-all" , tags=["Cell data"])
+async def get_all_cells(
+):
+    
+    return get_all_cell_data()
 
 
 if __name__ == '__main__':
