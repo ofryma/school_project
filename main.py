@@ -6,6 +6,7 @@ import matplotlib
 from typing import List , Any
 from fastapi import FastAPI , Query , Form
 from fastapi import File, UploadFile
+from fastapi.responses import FileResponse , HTMLResponse
 import uvicorn
 from pydantic import BaseModel
 
@@ -105,15 +106,38 @@ async def update_batch_configurations(
 
     return data
 
-@app.get("/" , tags=["Tests"])
-async def root():
-    return {"message": "API is up and running"}
-
 @app.get("/celldata/get-all" , tags=["Cell data"])
 async def get_all_cells(
 ):
     
     return get_all_cell_data()
+
+@app.get("/" , tags=["stats"])
+def display_dashboard(
+
+):
+    
+    data = get_all_cell_data()
+    
+    batch_numbers_list , pixel_for_batch = get_pixels_is_batch(data)
+
+    content_replace = {
+        "encapsulation_types_list" : str([""] + encapsulation_types + [""]),
+        "encapsulation_types_yield_data" : str([0] + [30 ,80] + [0]),
+        "batch_list" : str(batch_numbers_list),
+        "num_of_pixels_in_batch" : str(pixel_for_batch),
+        # "celldata_table" : dict_to_html_table(data),
+    }
+
+
+    with open("static/index.html" , 'r') as f:    
+        html_content = f.read()
+        for key in content_replace.keys():
+            html_content = html_content.replace(
+                key , content_replace[key]
+            )
+
+    return HTMLResponse(content=html_content, status_code=200)
 
 
 if __name__ == '__main__':

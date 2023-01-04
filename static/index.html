@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <title>School Project Dashboard</title>
+</head>
+    <body>
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Scool Project</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="/docs">Docs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      
+
+
+
+        <div class="container mt-5">
+            <div class="row">
+              <div class="col-6">
+                <canvas id="chart1"></canvas>
+              </div>
+              <div class="col-6">
+                <canvas id="chart2"></canvas>
+              </div>
+            </div>
+            <div class="row mt-5">
+              <div class="col-6">
+                <div id="prediction1">
+
+
+                  <!-- <form action="/submit" method="post" class="container">
+                    <div class="form-group">
+                      <label for="name">Name:</label>
+                      <input type="text" class="form-control" id="name" name="name">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email:</label>
+                      <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                      <label for="message">Message:</label>
+                      <textarea class="form-control" id="message" name="message"></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="reason">Reason for contact:</label>
+                      <select class="form-control" id="reason" name="reason">
+                        <option value="question">I have a question</option>
+                        <option value="feedback">I have feedback</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>  -->
+                  
+                  
+
+
+                </div>
+              </div>
+              <div class="col-6">
+                <canvas id="chart4"></canvas>
+              </div>
+            </div>
+          </div>
+
+          
+          <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+          <script>
+
+            // Create the chart
+            var ctx = document.getElementById("chart1").getContext("2d");
+            var chart = new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: batch_list,
+                datasets: [
+                  {
+                    label: "Pixels in Batch",
+                    data: num_of_pixels_in_batch,
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    borderColor: "rgba(0,0,0,1)",
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {}
+            });
+          </script>
+          
+
+          <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+          <script>
+            // Create the chart
+            var ctx = document.getElementById("chart2").getContext("2d");
+            var chart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                
+                labels: encapsulation_types_list,
+                datasets: [
+                  {
+                    label: "yield",
+                    data: encapsulation_types_yield_data,
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    borderColor: "rgba(0,0,0,1)",
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {}
+            });
+          </script>
+          
+
+
+          celldata_table
+            
+
+
+
+    </body>
+</html>
+
+

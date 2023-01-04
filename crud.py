@@ -125,7 +125,28 @@ class CellDataCreate(BaseModel):
     process_time_interval : datetime
     extra_notes : str
 
-def get_all_cell_data():
+def dict_to_html_table(data : dict):
+    columns = ""
+    for key in data.keys():
+        columns += f'<th scope="col">{key}</th>'
+    table_head = "<thead><tr>" + columns + "</tr></thead>"
+
+    table_body = "<tbody>"
+    for i in range(len(data[list(data.keys())[0]])):
+        table_body += "<tr>"
+        scope = 'scope="row"'
+        for key in data.keys():
+            table_body += f'<th {scope}>{data[key][i]}</th>'
+            scope = ""
+        table_body += '</tr>'
+    
+    table_body += '</tbody>'
+
+    table = '<table class="table table-striped table-bordered">' + table_head + table_body + '</table>'
+
+    return table
+
+def get_all_cell_data(format = 'python-dictionary'):
 
     ignore_keys = ['_sa_instance_state']
 
@@ -144,6 +165,8 @@ def get_all_cell_data():
             except:
                 data[k] = [row_dict[k]]
 
+    if format == "html-table":
+        data = dict_to_html_table(data)
 
     return data
 
@@ -233,3 +256,24 @@ def update_batch_params(
             record.extra_notes = old_notes + data["extra_notes"]
     
     session.commit()
+
+def get_pixels_is_batch(data : dict) -> list:
+
+    pixel_dict = {}
+
+    for b in data["batch_number"]:
+        try:
+            pixel_dict[b] += 1
+        except:
+            pixel_dict[b] = 1
+        
+    print(pixel_dict)
+
+    batch_numbers_list = []
+    pixel_for_batch = []
+
+    for key in pixel_dict.keys():
+        batch_numbers_list.append(key)
+        pixel_for_batch.append(pixel_dict[key])
+
+    return batch_numbers_list , pixel_for_batch 

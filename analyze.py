@@ -1,6 +1,6 @@
 
 
-encapsulation_types = ["Boom" , "UV glue"]
+encapsulation_types = ["Boom apoxy" , "UV glue"]
 layers = [1,2,3,4,5,6]
 datafiles_types = ["all" , "IV mesure" , "xlsx"]
 layers_functions = ["first" , "second"]
