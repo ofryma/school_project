@@ -1,4 +1,4 @@
-from database import CellData , session
+from database import CellData , Procedure , session
 from datetime import datetime
 from pydantic import BaseModel
 import pandas
@@ -22,101 +22,8 @@ class CellDataCreate(BaseModel):
     
     device_area : float
 
-    device_transperacy : int
-    number_of_layers : int
-    Substrate_material : str
 
-    # Layer 1
-    l1_function : str
-    l1_material : str
-    l1_fabrication_method : str
-    l1_thickness : float
-    l1_prod_date : datetime
-
-    # Layer 2
-    l2_function : str
-    l2_material : str
-    l2_fabrication_method : str
-    l2_thickness : float
-    l2_prod_date : datetime
-
-    # Layer 3
-    l3_function : str
-    l3_material : str
-    l3_fabrication_method : str
-    l3_thickness : float
-    l3_prod_date : datetime
-
-    # Layer 4
-    l4_function : str
-    l4_material : str
-    l4_fabrication_method : str
-    l4_thickness : float
-    l4_prod_date : datetime
-    l4_ratio : str
-    Processing_solvent : str
-    Additive_1 : str
-    Additive_1_concentration  : float
-    Additive_2   : str
-    Additive_2_concentration : float
-    Active_layer_treatment_from_processing : str
-    # Time since solution was prepared
-    # Solution concentration
-    # Solution temperature
-    # Relative humidity during processing
-    # "When was thermal annealing done 
-    # (pre-deposition, post-deposition, post-sealing, none)"
-    # Annealing temperature
-    # Annealing time
-    # Solvent vapor annealing
-    # Solvent used
-    # Solvent annealing time
-    # Antisolvent treatment (yes/no)
-    # Antisolvent (if used)
-    # Treatment Time (if used)
-    # Removal of Antisolvent (if used)
-
-    # Layer 5
-    l5_function : str
-    l5_material : str
-    l5_fabrication_method : str
-    l5_thickness : float
-    l5_prod_date : datetime
-    # Processing solvent
-    # Additive 1
-    # Additive 1 concentration
-    # Additive 2
-    # Additive 2 concentration
-    # Additive 3
-    # Additive 3 concentration
-    # Time since solution was prepared
-    # Solution concentration
-    # Solution temperature
-    # "When was thermal annealing done 
-    # (pre-deposition, post-deposition, post-sealing, none)"
-    # Annealing temperature
-    # Annealing time
-    # Antisolvent treatment (yes/no)
-
-
-    # Layer 6
-    l6_function : str
-    l6_material : str
-    l6_fabrication_method : str
-    l6_thickness : float
-    l6_prod_date : datetime
-    # Growth rate 1
-    # Growth rate 2
-    # Base pressure
-    # Substrate temperature
-    # Co-deposition (yes/no)
-    # Ratio (if co-deposited)
-    # Annealing temperature (if used)
-    # Annealing solvent (if used)  
-    # Annealing time (if used)
-
-    # Encap
-    
+    # Encap    
     encap_prod_date : datetime
     encap_in_GB : int
     encap_stored_location : str
@@ -151,7 +58,6 @@ def get_all_cell_data(format = 'python-dictionary'):
     ignore_keys = ['_sa_instance_state']
 
     records = session.query(CellData).all()
-
     data = {}
 
     for row in records:
@@ -174,11 +80,15 @@ def update_cell_IV_measurement(
     data : dict,
 ):
     q = session.query(CellData)
-    q = q.filter(
-        CellData.src_filename == data["src_filename"],
-        CellData.batch_number == data["batch_number"]
-        )
-    record = q.first()
+    
+    try:
+        q = q.filter(
+            CellData.src_filename == data["src_filename"],
+            CellData.batch_number == data["batch_number"]
+            )
+        record = q.first()
+    except:
+        record = None
 
     new = False
 
@@ -213,9 +123,11 @@ def update_cell_IV_measurement(
             old_notes = ""
         record.extra_notes = old_notes + data["extra_notes"]
     
+    record.procedure = data["procedure_name"]
     record.device_area = data["cellarea"]
     record.batch_number = data["batch_number"]
     record.encap_material = data["encapsulation_material"]
+    record.procedure = data["procedure_name"]
 
     if new:
         session.add(record)
@@ -228,16 +140,19 @@ def update_batch_params(
     data : dict
 ):
     q = session.query(CellData)
-    q = q.filter(
-        CellData.batch_number == data["batch_number"]
-        )
-    records = q.all()
-
+    try:
+        q = q.filter(
+            CellData.batch_number == data["batch_number"]
+            )
+        records = q.all()
+    except:
+        return "This batch not exsits"
     if records == None:
         return records
     
     for record in records:
         
+        record.procedure = data["procedure"]
         record.encap_material = data["encapsulation_material"]
         record.encap_in_GB = data["encapsulation_in_GB"]
         record.encap_stored_location = data["encapsulation_stored_location"]
@@ -257,16 +172,18 @@ def update_batch_params(
     
     session.commit()
 
-def get_pixels_is_batch(data : dict) -> list:
+def get_pixels_in_batch(data : dict) -> list:
 
     pixel_dict = {}
 
-    for b in data["batch_number"]:
-        try:
-            pixel_dict[b] += 1
-        except:
-            pixel_dict[b] = 1
-        
+    try:
+        for b in data["batch_number"]:
+            try:
+                pixel_dict[b] += 1
+            except:
+                pixel_dict[b] = 1
+    except:
+        pass
 
     batch_numbers_list = []
     pixel_for_batch = []
@@ -276,3 +193,183 @@ def get_pixels_is_batch(data : dict) -> list:
         pixel_for_batch.append(pixel_dict[key])
 
     return batch_numbers_list , pixel_for_batch 
+
+def get_procedures_name_list():
+
+    try:
+        records = get_procedures()
+        name_list = [record.name for record in records]
+        name_list.append("")
+        return name_list
+    except:
+        return [""]
+
+procdure_name_list = get_procedures_name_list()
+
+def get_procedures(format : str = "python-dictionary"):
+
+    records = session.query(Procedure).all()
+    data = {}
+    ignore_keys = ['_sa_instance_state']
+    for row in records:
+        row_dict = dict(row.__dict__)
+
+        for k in row_dict.keys():
+            if k in ignore_keys:
+                continue
+            
+            try:
+                data[k] += [row_dict[k]]
+            except:
+                data[k] = [row_dict[k]]
+
+    if format == "html-table":
+        data = dict_to_html_table(data)
+
+    return data
+
+def update_procedure(data : dict):
+    try:
+        record = session.query(Procedure).filter_by(name = data["name"]).first()
+    except:
+        record = None
+    
+    if not record == None:  
+        if not data['name'] == None:
+            record.name = data['name']
+        if not data['device_transperacy'] == None:
+            record.device_transperacy = data['device_transperacy']
+        if not data['number_of_layers'] == None:
+            record.number_of_layers = data['number_of_layers']
+        if not data['Substrate_material'] == None:
+            record.Substrate_material = data['Substrate_material']
+        if not data['l1_function'] == None:
+            record.l1_function = data['l1_function']
+        if not data['l1_material'] == None:
+            record.l1_material = data['l1_material']
+        if not data['l1_fabrication_method'] == None:
+            record.l1_fabrication_method = data['l1_fabrication_method']
+        if not data['l1_thickness'] == None:
+            record.l1_thickness = data['l1_thickness']
+
+        if not data['l2_function'] == None:
+            record.l2_function = data['l2_function']
+        if not data['l2_material'] == None:
+            record.l2_material = data['l2_material']
+        if not data['l2_fabrication_method'] == None:
+            record.l2_fabrication_method = data['l2_fabrication_method']
+        if not data['l2_thickness'] == None:
+            record.l2_thickness = data['l2_thickness']
+
+        if not data['l3_function'] == None:
+            record.l3_function = data['l3_function']
+        if not data['l3_material'] == None:
+            record.l3_material = data['l3_material']
+        if not data['l3_fabrication_method'] == None:
+            record.l3_fabrication_method = data['l3_fabrication_method']
+        if not data['l3_thickness'] == None:
+            record.l3_thickness = data['l3_thickness']
+
+        if not data['l4_function'] == None:
+            record.l4_function = data['l4_function']
+        if not data['l4_material'] == None:
+            record.l4_material = data['l4_material']
+        if not data['l4_fabrication_method'] == None:
+            record.l4_fabrication_method = data['l4_fabrication_method']
+        if not data['l4_thickness'] == None:
+            record.l4_thickness = data['l4_thickness']
+
+        if not data['l4_ratio'] == None:
+            record.l4_ratio = data['l4_ratio']
+        if not data['Processing_solvent'] == None:
+            record.Processing_solvent = data['Processing_solvent']
+        if not data['Additive_1'] == None:
+            record.Additive_1 = data['Additive_1']
+        if not data['Additive_1_concentration'] == None:
+            record.Additive_1_concentration = data['Additive_1_concentration']
+        if not data['Additive_2'] == None:
+            record.Additive_2 = data['Additive_2']
+        if not data['Additive_2_concentration'] == None:
+            record.Additive_2_concentration = data['Additive_2_concentration']
+        if not data['Active_layer_treatment_from_processing'] == None:
+            record.Active_layer_treatment_from_processing = data['Active_layer_treatment_from_processing']
+        if not data['l5_function'] == None:
+            record.l5_function = data['l5_function']
+        if not data['l5_material'] == None:
+            record.l5_material = data['l5_material']
+        if not data['l5_fabrication_method'] == None:
+            record.l5_fabrication_method = data['l5_fabrication_method']
+        if not data['l5_thickness'] == None:
+            record.l5_thickness = data['l5_thickness']
+
+        if not data['l6_function'] == None:
+            record.l6_function = data['l6_function']
+        if not data['l6_material'] == None:
+            record.l6_material = data['l6_material']
+        if not data['l6_fabrication_method'] == None:
+            record.l6_fabrication_method = data['l6_fabrication_method']
+        if not data['l6_thickness'] == None:
+            record.l6_thickness = data['l6_thickness']
+
+        if not data['extra_description'] == None:
+            record.extra_description = data['extra_description']
+        session.commit()
+
+        return record.__dict__
+    else:
+        return "Update failed"
+
+def add_procedure( procedure_name : str , data : dict):
+
+    session.add(Procedure(
+        name = procedure_name,
+        device_transperacy = data['device_transperacy'],
+        number_of_layers = data['number_of_layers'],
+        Substrate_material = data['Substrate_material'],
+        l1_function = data['l1_function'],
+        l1_material = data['l1_material'],
+        l1_fabrication_method = data['l1_fabrication_method'],
+        l1_thickness = data['l1_thickness'],
+        l2_function = data['l2_function'],
+        l2_material = data['l2_material'],
+        l2_fabrication_method = data['l2_fabrication_method'],
+        l2_thickness = data['l2_thickness'],
+        l3_function = data['l3_function'],
+        l3_material = data['l3_material'],
+        l3_fabrication_method = data['l3_fabrication_method'],
+        l3_thickness = data['l3_thickness'],
+        l4_function = data['l4_function'],
+        l4_material = data['l4_material'],
+        l4_fabrication_method = data['l4_fabrication_method'],
+        l4_thickness = data['l4_thickness'],
+        
+        l4_ratio = data['l4_ratio'],
+        Processing_solvent = data['Processing_solvent'],
+        Additive_1 = data['Additive_1'],
+        Additive_1_concentration = data['Additive_1_concentration'],
+        Additive_2 = data['Additive_2'],
+        Additive_2_concentration = data['Additive_2_concentration'],
+        Active_layer_treatment_from_processing = data['Active_layer_treatment_from_processing'],
+        l5_function = data['l5_function'],
+        l5_material = data['l5_material'],
+        l5_fabrication_method = data['l5_fabrication_method'],
+        l5_thickness = data['l5_thickness'],
+        
+        l6_function = data['l6_function'],
+        l6_material = data['l6_material'],
+        l6_fabrication_method = data['l6_fabrication_method'],
+        l6_thickness = data['l6_thickness'],
+        
+        extra_description = data['extra_description'],
+
+    ))
+
+    session.commit()
+
+    try:
+        record = session.query(Procedure).filter_by(name = procedure_name).first()
+    except:
+        record = None
+    
+    
+    return record
