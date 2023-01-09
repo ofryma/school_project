@@ -12,7 +12,7 @@ from typing import List
 
 db_url = "sqlite:///memory.db"
 
-engine = create_engine(db_url ) # , echo=True
+engine = create_engine(db_url , connect_args={"check_same_thread": False}) # , echo=True
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -26,7 +26,7 @@ Base = declarative_base()
 class CellData(Base):
     __tablename__ = "celldata"
 
-    id = Column(Integer, primary_key=True)
+    id = Column( Integer , primary_key=True , autoincrement=True )
     src_filename = Column(String)   
     batch_number = Column(Integer)
     prod_date = Column(DateTime , default=datetime.now())
@@ -34,18 +34,25 @@ class CellData(Base):
     # layers description 
     procedure = Column(String , nullable = True)
     
+    # mesured before encapsulation
+    Pmax_before = Column(Float , nullable = True)
+    Vmp_before = Column(Float , nullable = True)
+    Imp_before = Column(Float , nullable = True)
     Jsc_before = Column(Float , nullable = True)
     Uoc_before = Column(Float , nullable = True)
     FF_before = Column(Float , nullable = True)
     Eff_before = Column(Float , nullable = True)
-    
+
+    # mesured after encapsulation
+    Pmax_after = Column(Float , nullable = True)
+    Vmp_after = Column(Float , nullable = True)
+    Imp_after = Column(Float , nullable = True)
     Jsc_after = Column(Float , nullable = True)
     Uoc_after = Column(Float , nullable = True)
     FF_after = Column(Float , nullable = True)
     Eff_after = Column(Float , nullable = True)
     
     device_area = Column(Float , nullable = True)
-
 
 
     # Encapsulation data

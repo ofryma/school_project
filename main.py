@@ -45,6 +45,7 @@ async def create_file(
         
 
         for i in range(len(all_file_data[data_keys[0]])):
+
             cur_cell_data = {}
             cur_cell_data["src_filename"] = all_file_data["filename"][i]
             cur_cell_data["Jsc"] = all_file_data["Jsc"][i]
@@ -52,7 +53,6 @@ async def create_file(
             cur_cell_data["FF"] = all_file_data["FF"][i]
             cur_cell_data["Eff"] = all_file_data["Eff"][i]
             cur_cell_data["cellarea"] = all_file_data["cellarea"][i]
-            
             cur_cell_data["procedure_name"] = procedure_name
             cur_cell_data["batch_number"] = batch_number
             cur_cell_data["encapsulation_status"] = encapsulation_status
@@ -78,6 +78,9 @@ async def create_file(
 
 
     return res
+
+
+
 
 @app.put("/update-batch/config/{batch_number}" , tags=["Batch"])
 async def update_batch_configurations(
@@ -110,6 +113,15 @@ async def update_batch_configurations(
     update_batch_params(data)
 
     return data
+
+
+@app.delete("/batch/delete/{batch_number}" , tags=["Batch"])
+async def delete_one_batch(
+    batch_number : int,
+):
+
+    return delete_batch(batch_number=batch_number)
+
 
 @app.post("/procedure/add-new/{procedure_name}" , tags=["Procedures"])
 async def add_new_procedure(

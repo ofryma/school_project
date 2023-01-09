@@ -105,12 +105,24 @@ def update_cell_IV_measurement(
         record.Uoc_before = data["Voc"]
         record.FF_before = data["FF"]
         record.Eff_before = data["Eff"]
+        try:
+            record.Pmax_before = data["Pmax"]
+            record.Vmp_before = data["Vmp"]
+            record.Imp_before = data["Imp"]
+        except:
+            pass
     elif data["encapsulation_status"] == "after":
         record.Jsc_after = data["Jsc"]
         record.Uoc_after = data["Voc"]
         record.FF_after = data["FF"]
         record.Eff_after = data["Eff"]
         record.encap_prod_date = datetime.now()
+        try:
+            record.Pmax_after = data["Pmax"]
+            record.Vmp_after = data["Vmp"]
+            record.Imp_after = data["Imp"]
+        except:
+            pass
 
 
     if not data["extra_notes"] == "":
@@ -171,6 +183,21 @@ def update_batch_params(
             record.extra_notes = old_notes + data["extra_notes"]
     
     session.commit()
+
+def delete_batch(batch_number : int):
+
+    try:
+        records = session.query(CellData).filter_by(batch_number = batch_number).all()
+
+        for record in records:
+            session.delete(record)
+
+        session.commit()
+
+        msg_res = "Batch Deleted"
+    except:
+        msg_res = "There was a problem with deleting this batch"
+    return msg_res
 
 def get_pixels_in_batch(data : dict) -> list:
 

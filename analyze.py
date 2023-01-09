@@ -5,6 +5,7 @@ layers = [1,2,3,4,5,6]
 datafiles_types = ["all" , "IV mesure" , "xlsx"]
 layers_functions = ["first" , "second"]
 
+
 def convert_to_num(number : str) -> float:
     base_num , ten_pow = number.split("E")
     if base_num[0] == "+":
@@ -33,7 +34,7 @@ def analyze_IV( I : list , V : list , cellarea : float , Pin : float = 1):
     # Pmax - max of I*V
     # FF - Pmax / (Vox * Isc)
     # Eff - ( Pmax * 1000) / cellarea
-    # cellarea - 
+    # cellarea - the area on the cell that is under light
 
     # find the colsest value to zero
     I_abs = [abs(i) for i in I]
