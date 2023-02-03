@@ -10,9 +10,16 @@ from datetime import datetime
 from typing import List
 
 
-db_url = "sqlite:///memory.db"
 
+drive_path = "C:\\Users\Asus\Google Drive\Projects\school_project"
+
+if not os.path.exists(drive_path):
+    drive_path = ""
+
+db_url = f"sqlite:///{os.path.join(drive_path , 'memory.db')}"
 engine = create_engine(db_url , connect_args={"check_same_thread": False}) # , echo=True
+
+print(db_url)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -34,6 +41,11 @@ class CellData(Base):
     # layers description 
     procedure = Column(String , nullable = True)
     
+    # check criteria
+    bias = Column(String , nullable = True)
+    light = Column(String , nullable = True)
+
+
     # mesured before encapsulation
     Pmax_before = Column(Float , nullable = True)
     Vmp_before = Column(Float , nullable = True)
@@ -54,7 +66,6 @@ class CellData(Base):
     
     device_area = Column(Float , nullable = True)
 
-
     # Encapsulation data
     encap_prod_date = Column(DateTime , nullable=True)
     encap_in_GB = Column(Integer , nullable=True)
@@ -63,6 +74,10 @@ class CellData(Base):
     applied_presure = Column(Integer , nullable = True)
     process_time_interval = Column(DateTime , nullable = True)
     extra_notes = Column(String , nullable = True)
+
+    pass_cell = Column(Boolean , nullable = True)
+    yeild_cell = Column(Boolean , nullable = True)
+
 
 
 class Procedure(Base):
@@ -167,8 +182,6 @@ class Procedure(Base):
     # Annealing time (if used)
 
     extra_description = Column(String)
-
-
 
 
 # Base.metadata.drop_all(engine)

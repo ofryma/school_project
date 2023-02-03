@@ -1,9 +1,22 @@
 
 
+# const 
+EFF_PASS_TH = 1 # %
+DIFF_EFF_FOR_YIELD = 20 # %
+
 encapsulation_types = ["Boom apoxy" , "UV glue"]
 layers = [1,2,3,4,5,6]
 datafiles_types = ["all" , "IV mesure" , "xlsx"]
-layers_functions = ["first" , "second"]
+layers_functions = [
+    "FTO" , 
+    "C-TiO2" , 
+    "m-TiO2 doped Li" , 
+    "Perovskite" , 
+    "Spiro-OMeTAD" , 
+    "Au" , 
+    "KW peptide" , 
+    "RK peptide"
+    ]
 
 
 def convert_to_num(number : str) -> float:
@@ -172,7 +185,48 @@ def read_our_csv(csv_url : str) -> any:
     
     return data_dict
 
+def is_pass(pixel_eff : float) -> bool:
 
+    if float(pixel_eff) > EFF_PASS_TH:
+        return True
+    return False
+
+def is_yield(before_encap_eff : float , after_encap_eff : float ) -> bool:
+
+    """
+        If the different between the efficiancy before and after
+        encapsulation is greater than 20 % change, than this pixel
+        is not count as good encapsulated cell
+    """
+    before_encap_eff = float(before_encap_eff)
+    after_encap_eff = float(after_encap_eff)
+
+    if after_encap_eff >= before_encap_eff:
+        return True
+
+    delta_eff = abs(before_encap_eff - after_encap_eff)
+
+    if  (delta_eff / before_encap_eff) * 100 <  DIFF_EFF_FOR_YIELD:
+        return True
+    
+    return False
+
+def get_check_criteria(src_filename : str):
+
+    bias = "R"
+    light = "L"
+
+    if "f" in src_filename.lower():
+        bias = "F"
+    elif "r" in src_filename.lower():
+        bias = "R"
+    
+    if "l" in src_filename.lower():
+        light = "L"
+    elif "d" in src_filename.lower():
+        light = "D"
+        
+    return bias , light
 
 
 

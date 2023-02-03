@@ -2,7 +2,7 @@ from database import CellData , Procedure , session
 from datetime import datetime
 from pydantic import BaseModel
 import pandas
-
+import analyze
 
 class CellDataCreate(BaseModel):
 
@@ -99,12 +99,17 @@ def update_cell_IV_measurement(
         )
         new = True
     
+
+    record.bias , record.light = analyze.get_check_criteria(data["src_filename"])
     
     if data["encapsulation_status"] == "before":
         record.Jsc_before = data["Jsc"]
         record.Uoc_before = data["Voc"]
         record.FF_before = data["FF"]
         record.Eff_before = data["Eff"]
+        record.pass_cell = analyze.is_pass(data["Eff"])
+        
+
         try:
             record.Pmax_before = data["Pmax"]
             record.Vmp_before = data["Vmp"]
@@ -116,6 +121,11 @@ def update_cell_IV_measurement(
         record.Uoc_after = data["Voc"]
         record.FF_after = data["FF"]
         record.Eff_after = data["Eff"]
+        try:
+            record.yeild_cell = analyze.is_yield(record.Eff_before , data["Eff"])
+        except Exception as e:
+            print(e)
+        
         record.encap_prod_date = datetime.now()
         try:
             record.Pmax_after = data["Pmax"]
@@ -400,3 +410,29 @@ def add_procedure( procedure_name : str , data : dict):
     
     
     return record
+
+
+def get_incapsulations_yeild_numbers():
+    yeild_data_list = []
+
+    for material in analyze.encapsulation_types:
+        
+        pass_records = session.query(CellData).filter_by(
+            pass_cell = True,
+            encap_material = material,
+            bias = "R",
+            light = "L",
+        ).all()
+        yeild_records = session.query(CellData).filter_by(
+            yeild_cell = True,
+            encap_material = material,
+            bias = "R",
+            light = "L",
+        ).all()
+
+        try:
+            yeild_data_list.append(len(yeild_records) / len(pass_records) * 100)
+        except:
+            yeild_data_list.append(0)
+        
+    return yeild_data_list

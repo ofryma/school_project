@@ -10,13 +10,28 @@ from fastapi.responses import FileResponse , HTMLResponse
 import uvicorn
 from pydantic import BaseModel
 
+import io
+
 from analyze import *
 from crud import *
+
 
 
 app = FastAPI(
     title= "School Project"
     )
+
+
+@app.get("/download-data" , tags=["Data files"])
+async def download_file():
+    cell_data_file_path = "cell-data.csv"
+    df = pd.DataFrame(get_all_cell_data())
+    df.to_csv(cell_data_file_path , index=False)
+
+    
+    return FileResponse(cell_data_file_path , media_type='application/octet-stream',filename=cell_data_file_path)
+    
+
 
 
 @app.post("/datafile/upload-data/{batch_number}" , tags=["Data files"])
@@ -131,28 +146,28 @@ async def add_new_procedure(
     Substrate_material : str = None,
 
     # Layer 1
-    l1_function : str = None,
+    l1_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l1_material : str = None,
     l1_fabrication_method : str = None,
     l1_thickness : float = None,
     
 
     # Layer 2
-    l2_function : str = None,
+    l2_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l2_material : str = None,
     l2_fabrication_method : str = None,
     l2_thickness : float = None,
     
 
     # Layer 3
-    l3_function : str = None,
+    l3_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l3_material : str = None,
     l3_fabrication_method : str = None,
     l3_thickness : float = None,
     
 
     # Layer 4
-    l4_function : str = None,
+    l4_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l4_material : str = None,
     l4_fabrication_method : str = None,
     l4_thickness : float = None,
@@ -181,7 +196,7 @@ async def add_new_procedure(
     # Removal of Antisolvent (if used)
 
     # Layer 5
-    l5_function : str = None,
+    l5_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l5_material : str = None,
     l5_fabrication_method : str = None,
     l5_thickness : float = None,
@@ -204,7 +219,7 @@ async def add_new_procedure(
 
 
     # Layer 6
-    l6_function : str = None,
+    l6_function : str = Query(layers_functions[0] ,enum = layers_functions),
     l6_material : str = None,
     l6_fabrication_method : str = None,
     l6_thickness : float = None,
@@ -440,12 +455,14 @@ def display_dashboard(
     data = get_all_cell_data()
     
     batch_numbers_list , pixel_for_batch = get_pixels_in_batch(data)
-
+    encapsulation_types_yield_data = get_incapsulations_yeild_numbers()
     
 
     content_replace = {
+
         "encapsulation_types_list" : str([""] + encapsulation_types + [""]),
-        "encapsulation_types_yield_data" : str([0] + [30 ,80] + [0]),
+        "encapsulation_types_yield_data" : str([0] + encapsulation_types_yield_data + [0]),
+
         "batch_list" : str(batch_numbers_list),
         "num_of_pixels_in_batch" : str(pixel_for_batch),
         # "celldata_table" : dict_to_html_table(data),
