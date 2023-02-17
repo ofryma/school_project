@@ -10,9 +10,16 @@ from datetime import datetime
 from typing import List
 
 
-db_url = "sqlite:///memory.db"
 
-engine = create_engine(db_url ) # , echo=True
+drive_path = "C:\\Users\Asus\Google Drive\Projects\school_project"
+
+if not os.path.exists(drive_path):
+    drive_path = ""
+
+db_url = f"sqlite:///{os.path.join(drive_path , 'memory.db')}"
+engine = create_engine(db_url , connect_args={"check_same_thread": False}) # , echo=True
+
+print(db_url)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -26,22 +33,60 @@ Base = declarative_base()
 class CellData(Base):
     __tablename__ = "celldata"
 
-    id = Column(Integer, primary_key=True)
+    id = Column( Integer , primary_key=True , autoincrement=True )
     src_filename = Column(String)   
     batch_number = Column(Integer)
     prod_date = Column(DateTime , default=datetime.now())
+
+    # layers description 
+    procedure = Column(String , nullable = True)
     
+    # check criteria
+    bias = Column(String , nullable = True)
+    light = Column(String , nullable = True)
+
+
+    # mesured before encapsulation
+    Pmax_before = Column(Float , nullable = True)
+    Vmp_before = Column(Float , nullable = True)
+    Imp_before = Column(Float , nullable = True)
     Jsc_before = Column(Float , nullable = True)
     Uoc_before = Column(Float , nullable = True)
     FF_before = Column(Float , nullable = True)
     Eff_before = Column(Float , nullable = True)
-    
+
+    # mesured after encapsulation
+    Pmax_after = Column(Float , nullable = True)
+    Vmp_after = Column(Float , nullable = True)
+    Imp_after = Column(Float , nullable = True)
     Jsc_after = Column(Float , nullable = True)
     Uoc_after = Column(Float , nullable = True)
     FF_after = Column(Float , nullable = True)
     Eff_after = Column(Float , nullable = True)
     
     device_area = Column(Float , nullable = True)
+
+    # Encapsulation data
+    encap_prod_date = Column(DateTime , nullable=True)
+    encap_in_GB = Column(Integer , nullable=True)
+    encap_stored_location = Column(String)
+    encap_material = Column(String)
+    applied_presure = Column(Integer , nullable = True)
+    process_time_interval = Column(DateTime , nullable = True)
+    extra_notes = Column(String , nullable = True)
+
+    pass_cell = Column(Boolean , nullable = True)
+    yeild_cell = Column(Boolean , nullable = True)
+
+
+
+class Procedure(Base):
+
+    __tablename__ = "procedures"
+
+    id = Column(Integer , primary_key=True )
+    name = Column(String(20) , nullable = False)
+
 
     device_transperacy = Column(Integer , nullable=True)
     number_of_layers = Column(Integer , nullable=True)
@@ -52,28 +97,28 @@ class CellData(Base):
     l1_material = Column(String , nullable=True)
     l1_fabrication_method = Column(String , nullable=True)
     l1_thickness = Column(Float , nullable=True)
-    l1_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
 
     # Layer 2
     l2_function = Column(String , nullable=True)
     l2_material = Column(String , nullable=True)
     l2_fabrication_method = Column(String , nullable=True)
     l2_thickness = Column(Float , nullable=True)
-    l2_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
 
     # Layer 3
     l3_function = Column(String , nullable = True)
     l3_material = Column(String , nullable=True)
     l3_fabrication_method = Column(String)
     l3_thickness = Column(Float , nullable=True)
-    l3_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
 
     # Layer 4
     l4_function = Column(String , nullable=True)
     l4_material = Column(String , nullable=True)
     l4_fabrication_method = Column(String , nullable=True)
     l4_thickness = Column(Float , nullable=True)
-    l4_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
     l4_ratio = Column(String , nullable=True)
     Processing_solvent = Column(String , nullable=True)
     Additive_1 = Column(String , nullable=True)
@@ -102,7 +147,7 @@ class CellData(Base):
     l5_material = Column(String , nullable=True)
     l5_fabrication_method = Column(String , nullable=True)
     l5_thickness = Column(Float , nullable=True)
-    l5_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
     # Processing solvent
     # Additive 1
     # Additive 1 concentration
@@ -125,7 +170,7 @@ class CellData(Base):
     l6_material = Column(String , nullable=True)
     l6_fabrication_method = Column(String , nullable=True)
     l6_thickness = Column(Float , nullable=True)
-    l6_prod_date = Column(DateTime , nullable=True , default=datetime.now())
+    
     # Growth rate 1
     # Growth rate 2
     # Base pressure
@@ -136,43 +181,8 @@ class CellData(Base):
     # Annealing solvent (if used)  
     # Annealing time (if used)
 
-    # Encap
-    
-    encap_prod_date = Column(DateTime , nullable=True , default=datetime.now())
-    encap_in_GB = Column(Integer , nullable=True)
-    encap_stored_location = Column(String)
-    encap_material = Column(String)
-    applied_presure = Column(Integer , nullable = True)
-    process_time_interval = Column(DateTime , nullable = True)
-    extra_notes = Column(String , nullable = True)
-
-    # UV_glue = Column(Integer , nullable=True)
-    # Boom_epoxy = Column(Integer , nullable=True)
+    extra_description = Column(String)
 
 
-###############
-# BASE MODELS #
-###############
-
-
-class CellDataCreate(BaseModel):
-    src_filename: str
-    batch_number: int
-    Uoc : float
-    FF : float
-    Eff : float
-    Jsc: float
-
-    def create(self):
-        session.add(CellData(
-            src_filename = self.src_filename,
-            batch_number = self.batch_number,
-            Uoc = self.Uoc,
-            FF = self.FF,
-            Eff = self.Eff,
-            Jsc = self.Jsc,
-        ))
-        session.commit()
-
-
+# Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)

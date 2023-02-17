@@ -1,0 +1,187 @@
+implicit none
+integer  io, i, stat
+real(8)  x1, x2, y1, y2, c                          ! points
+real(8)  p_max, x, y, q, x_max, y_max               ! output data
+character(len = 200)  name, name_out, name_out1     ! input file name; less than 200 characters 
+character(len = 130) str
+character(len = 30) dummy
+character(len = 1) a, ans
+logical st, written
+
+
+integer :: k, j = 200             ! position pointer
+
+
+1 format(A15, 2x, F14.6, 1x, A )
+2 format(f14.6,2x,f14.7)
+3 format(A15, 2x, F14.6, 1x, A )
+4 format(A15, 2x, F14.8, 1x, A  )
+5 format(A15, 2x, F10.3, 1x, A )
+6 format(a8,1x,a18,1x,a18,1x,a8,1x,a12,1x,a15)
+7 format(a15,1x,f14.6,1x,f14.7,1x,f10.3,1x,f13.7,1x,f11.4)
+if( iargc() == 0) then
+  write(*, '(A)', advance = 'no') 'file: '
+  read(*, '(A)') name
+else 
+  call getarg(1, name)
+!  print*, iargc(), name
+end if
+
+write(*,"(A)", advance = 'no') "cellarea = " 
+c = 0.09
+
+io = 0
+p_max = 0
+open(1, file = name)
+
+do 
+  if(name(j:j) == '.') then
+   exit 
+  else
+    j = j - 1
+  end if
+end do
+
+name_out = name
+name_out1 = name
+name_out(j:) = '.result.txt' 
+name_out1(j:) = '.table.txt' 
+
+k = index(name, '\', .true.)
+
+!k = k+1
+
+do i=1,2
+ read(1,*) dummy
+end do
+
+open(2,file = name_out1, status = 'replace')
+
+read(1, *, iostat = io) x1, y1
+write(2,2) x1*(1000), y1*(1000)/c 
+
+do while(io == 0)
+  read(1, *, iostat = io) x2, y2
+  write(2,2) x2*(1000), y2*(1000)/c 
+  if(x2 .ge. 0 .and. y2 .le. 0 .and. p_max < abs(x2*y2)) then
+    p_max = abs(x2*y2)
+    x_max = x2
+    y_max = y2
+  end if
+  if(y2*y1 < 0) then
+    x = (y1*x2)/(y1-y2) - (x1*y2)/(y1-y2)
+  else if(x2*x1 < 0) then
+    y = ((x1*y2)/(x1-x2)) - ((y1*x2)/(x1-x2))
+  end if
+  y1 = y2
+  x1 = x2
+end do 
+
+close(2)
+
+q = p_max/(x*y)
+
+print 1, 'voltage', x*1000, 'mV'
+print 3, 'current', y*(-1000)/c, 'mA'
+print 1, 'voltage_max', x_max*1000, 'mV'
+print 3, 'current_max', y_max*(-1000)/c, 'mA'
+print 5, 'FF', q*(-100),'%'
+print 4, 'power', p_max*1000/c, 'mW'
+
+open(2, file = name_out, status = 'replace')
+
+write(2, 1) 'voltage', x*1000, 'mV'
+write(2, 3) 'current', y*(-1000)/c, 'mA'
+write(2, 1) 'voltage_max', x_max*1000, 'mV'
+write(2, 3) 'current_max', y_max*(-1000)/c, 'mA'
+write(2, 5) 'FF', q*(-100),'%'
+write(2, 4) 'power', p_max*1000/c, 'mW'
+write(2, 4) 'Cell area', c, 'cm^2'
+
+close(1)
+close(2)
+
+inquire(file = 'all.txt', exist = st)
+if(st .eqv. .true.) then
+ open(1, file = 'all.txt', status = 'old')
+else
+ open(1, file = 'all.txt', status = 'new')
+ write(1,6) 'filename', 'Uoc, mV', 'Jsc, mA/cm2', 'FF, %', 'Eff, %', 'cellarea'
+end if
+
+close(1)
+open(1, file = 'all.txt', status = 'old')
+open(2, status = 'scratch')
+
+stat = 0
+written = .false.
+do while(stat /= -1)
+ call rstr(str, 1, stat)
+ if(stat == -1) exit
+! print*,'string: ', str
+ if(index(str,name(k+1:j+3)) /= 0) then
+  write(*, '(a)') 'The file being processed is already in the list!'
+  write(*, '(a)') str
+  write(*, '(a)', advance = 'no' ) 'R)eplace,  K)eep entry? '
+  read(*,*) ans
+  select case (ans)
+   case ('R', 'r') 
+    write(2,7), name(k+1:),  x*1000, y*(-1000)/c, q*(-100), p_max*1000/c, c
+    written = .true.
+   case ('K', 'k')
+    write(2,'(a)') str
+  end select
+ else
+  write(2,'(a)') str
+ end if
+end do
+
+if(.not. written) then
+ write(2,7), name(k+1:),  x*1000, y*(-1000)/c, q*(-100), p_max*1000/c, c
+end if
+
+!write(1,7), name,  x*1000, y*(-1000)/c, q*(-100), p_max*1000/c
+close(1, status = 'delete')
+rewind(2)
+open(1, file = 'all.txt', status = 'new')
+
+stat = 0
+do while(stat /= -1)
+ call rstr(str, 2, stat)
+ if(stat == -1) exit 
+ write(1,'(a)') str
+end do
+
+close(2)
+close(1)
+
+contains
+
+subroutine rstr(str, id, stat) ! reads one string at a time
+
+character(len=*) str
+integer id, stat
+
+integer :: io, cntr = 1
+character*1 buff
+
+str = ' '
+
+do
+ read(id,'(a)', iostat = io, advance = 'no') buff
+ if(io == -1) then
+  stat = io
+  exit
+ else if(io == -2) then
+  str(cntr:cntr) = buff
+  cntr = 1
+  stat = io 
+  exit
+ else
+  str(cntr:cntr) = buff
+  cntr = cntr + 1 
+ end if
+end do
+
+end subroutine rstr
+end
