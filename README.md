@@ -41,6 +41,4 @@ docker push public.ecr.aws/h6w9d2s6/school-project:latest
 docker run -d -p 8001:80 public.ecr.aws/h6w9d2s6/school-project:latest
 ```
 
-## Update the ECS container
-
 
