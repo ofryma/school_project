@@ -11,23 +11,14 @@ import uvicorn
 from pydantic import BaseModel
 import scipy
 from math import pow
-import openpyxl
-import aiofiles
 from typing import List
-
 import io
-
 from analyze import *
 from crud import *
-
-
 
 app = FastAPI(
     title= "School Project"
     )
-
-
-
 
 
 def find_value(index : str , tag_len: int , data : str , close_tag : str = "$"):
@@ -42,11 +33,8 @@ def find_value(index : str , tag_len: int , data : str , close_tag : str = "$"):
 
     return value
 
-
 def kappa(ref_dens : float , defu : float , cp : float):
     return ref_dens * defu * cp
-
-
 
 def kappa_calc(data):
 
@@ -88,9 +76,6 @@ def kappa_calc(data):
     return data_dict
 
 
-
-
-
 @app.get("/download-data" , tags=["Data files"])
 async def download_file():
     cell_data_file_path = "cell-data.csv"
@@ -100,7 +85,6 @@ async def download_file():
     
     return FileResponse(cell_data_file_path , media_type='application/octet-stream',filename=cell_data_file_path)
     
-
 @app.post("/itamar/raw-data-file")
 async def zt_file_analyzer(
     lfa_file: UploadFile = File(...),
@@ -167,18 +151,8 @@ async def zt_file_analyzer(
 
     return FileResponse("data.csv" , media_type='application/octet-stream',filename=lfa_file.filename)
 
-
-
 @app.post("/datafile/upload-data/{batch_number}" , tags=["Data files"])
-async def create_file(
-    batch_number : int,
-    procedure_name : str = Query(procdure_name_list[0] , enum = procdure_name_list),
-    file_type : str = Query(datafiles_types[0] , enum = datafiles_types),
-    encapsulation_material : str = Query(encapsulation_types[0] , enum = encapsulation_types),
-    encapsulation_status : str = Query("before" , enum = ["before" , "after"]),
-    file: UploadFile = File(...),
-    cellarea : float = 0.09,
-    extra_notes : str = "",
+async def create_file(file: UploadFile = File(...),):
     
     res = {"Result": "OK", "filenames": file.filename}
     if not file.filename.endswith("txt"):
