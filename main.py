@@ -151,8 +151,8 @@ async def zt_file_analyzer(
 
     return FileResponse("data.csv" , media_type='application/octet-stream',filename=lfa_file.filename)
 
-@app.post("/datafile/upload-data/{batch_number}" , tags=["Data files"])
-async def create_file(file: UploadFile = File(...),):
+@app.post("/upload-folder" , tags=["Data files"])
+async def upload_batch_folder(file: UploadFile = File(...),):
     
     res = {"Result": "OK", "filenames": file.filename}
     if not file.filename.endswith("txt"):
@@ -167,6 +167,13 @@ async def create_file(file: UploadFile = File(...),):
     batch_number = int(batch_name.split("_")[1])
     encapsulation_status = file_info[1]
     filename = file_info[-1]
+
+    if not ("l" in filename.lower() or "d" in filename.lower()):
+        print(filename)
+        filename = f'{filename.split(".")[0]}-L.{filename.split(".")[1]}'
+        print(filename)
+
+
     cellarea = 0.09
 
     data = file.file.read().decode("utf-8")
