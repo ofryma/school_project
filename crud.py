@@ -3,6 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel
 import pandas
 import analyze
+from sqlalchemy import and_
+
 
 class CellDataCreate(BaseModel):
 
@@ -31,6 +33,7 @@ class CellDataCreate(BaseModel):
     applied_presure : int
     process_time_interval : datetime
     extra_notes : str
+    image_path : str = None
 
 def dict_to_html_table(data : dict):
     columns = ""
@@ -75,6 +78,27 @@ def get_all_cell_data(format = 'python-dictionary'):
         data = dict_to_html_table(data)
 
     return data
+
+def update_cell_image_path(batch_number : int , cell_number : int , image_path : str):
+
+
+
+    search_term = f'%{cell_number}%'
+
+    results = session.query(CellData).filter(
+        and_(
+            CellData.batch_number == batch_number,
+            CellData.src_filename.like(search_term), 
+            )
+    ).all()
+
+    for record in results:
+        record.image_path = image_path
+    
+    session.commit()
+
+    return
+
 
 def update_cell_IV_measurement(
     **kwargs

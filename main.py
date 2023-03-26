@@ -1,18 +1,13 @@
 import os
 from database import *
 import pandas as pd
-import numpy as np
-import matplotlib
 from typing import List , Any
 from fastapi import FastAPI , Query , Form
 from fastapi import File, UploadFile
 from fastapi.responses import FileResponse , HTMLResponse
-import uvicorn
 from pydantic import BaseModel
-import scipy
 from math import pow
 from typing import List
-import io
 from analyze import *
 from crud import *
 
@@ -155,6 +150,15 @@ async def zt_file_analyzer(
 async def upload_batch_folder(file: UploadFile = File(...),):
     
     res = {"Result": "OK", "filenames": file.filename}
+    if file.filename.lower().endswith("png") or file.filename.lower().endswith("jpg") or file.filename.lower().endswith("jpg"):
+        # update image info
+        file_info = file.filename.split("/")
+        batch_name = file_info[0]
+        batch_number = int(batch_name.split("_")[1])
+        encapsulation_status = file_info[1]
+        filename = file_info[-1]
+        update_cell_image_path(batch_number , filename.split(".")[0] , file.filename)
+
     if not file.filename.endswith("txt"):
         return res
     if "table" in file.filename or "results" in file.filename:
@@ -203,6 +207,8 @@ async def upload_batch_folder(file: UploadFile = File(...),):
     )
 
     return res
+
+
 
 @app.put("/update-batch/config/{batch_number}" , tags=["Batch"])
 async def update_batch_configurations(

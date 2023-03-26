@@ -73,6 +73,7 @@ class CellData(Base):
 
     pass_cell = Column(Boolean , nullable = True)
     yeild_cell = Column(Boolean , nullable = True)
+    image_path = Column(String , nullable=True)
 
 class FabricationProcedure(Base):
 
