@@ -6,7 +6,7 @@ on:
 
 env:
   ECR_REGISTRY: school-project
-  AWS_REGION: us-east-1
+  AWS_REGION: us-east-2
 
 jobs:
   build-and-push:
