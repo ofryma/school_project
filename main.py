@@ -2,17 +2,13 @@ import os
 from database import *
 import pandas as pd
 import numpy as np
-import matplotlib
 from typing import List , Any
 from fastapi import FastAPI , Query , Form
 from fastapi import File, UploadFile
 from fastapi.responses import FileResponse , HTMLResponse
 import uvicorn
 from pydantic import BaseModel
-import scipy
 from math import pow
-import openpyxl
-import io
 
 from analyze import *
 from crud import *
@@ -103,8 +99,6 @@ async def zt_file_analyzer(
     lfa_file: UploadFile = File(...),
     lsr_file: UploadFile = File(...),
 ):
-
-
 
     data_dict = kappa_calc(str(lfa_file.file.read()))
 
@@ -225,8 +219,6 @@ async def create_file(
 
 
     return res
-
-
 
 
 @app.put("/update-batch/config/{batch_number}" , tags=["Batch"])
