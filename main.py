@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse , HTMLResponse
 from pydantic import BaseModel
 from math import pow
 from typing import List
+
 from analyze import *
 from crud import *
 
@@ -85,8 +86,6 @@ async def zt_file_analyzer(
     lfa_file: UploadFile = File(...),
     lsr_file: UploadFile = File(...),
 ):
-
-
 
     data_dict = kappa_calc(str(lfa_file.file.read()))
 
@@ -207,6 +206,7 @@ async def upload_batch_folder(file: UploadFile = File(...),):
     )
 
     return res
+
 
 
 
