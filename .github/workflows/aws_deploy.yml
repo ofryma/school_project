@@ -27,10 +27,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Build and tag Docker image, and push to ECR
-        id: login-ecr
         run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/h6w9d2s6
           docker build -t school_project_api:latest public.ecr.aws/h6w9d2s6/school-project:latest
           docker push public.ecr.aws/h6w9d2s6/school-project:latest
-
