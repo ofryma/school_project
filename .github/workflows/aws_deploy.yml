@@ -1,8 +1,8 @@
 name: Build and Push Docker Image to ECR
 
 on:
-  # push:
-  #   branches: [main]
+  push:
+    branches: [main]
 
 env:
   ECR_REGISTRY: school-project
