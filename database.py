@@ -37,14 +37,10 @@ class CellData(Base):
     src_filename = Column(String)   
     batch_number = Column(Integer)
     prod_date = Column(DateTime , default=datetime.now())
-
-    # layers description 
-    procedure = Column(String , nullable = True)
     
     # check criteria
     bias = Column(String , nullable = True)
     light = Column(String , nullable = True)
-
 
     # mesured before encapsulation
     Pmax_before = Column(Float , nullable = True)
@@ -66,122 +62,37 @@ class CellData(Base):
     
     device_area = Column(Float , nullable = True)
 
+    # Fabrication data
+    fabrication_procedure_number = Column(Integer , ForeignKey("fabrication_procedures.id"))
+
     # Encapsulation data
-    encap_prod_date = Column(DateTime , nullable=True)
-    encap_in_GB = Column(Integer , nullable=True)
-    encap_stored_location = Column(String)
+    encap_procedure_number = Column(Integer , ForeignKey("encapsulation_procedures.id"))
     encap_material = Column(String)
-    applied_presure = Column(Integer , nullable = True)
-    process_time_interval = Column(DateTime , nullable = True)
+    encap_prod_date = Column(DateTime , nullable=True)
     extra_notes = Column(String , nullable = True)
 
     pass_cell = Column(Boolean , nullable = True)
     yeild_cell = Column(Boolean , nullable = True)
+    image_path = Column(String , nullable=True)
 
+class FabricationProcedure(Base):
 
-
-class Procedure(Base):
-
-    __tablename__ = "procedures"
+    __tablename__ = "fabrication_procedures"
 
     id = Column(Integer , primary_key=True )
     name = Column(String(20) , nullable = False)
+    description = Column(String)
 
-
-    device_transperacy = Column(Integer , nullable=True)
-    number_of_layers = Column(Integer , nullable=True)
-    Substrate_material = Column(String , nullable=True)
-
-    # Layer 1
-    l1_function = Column(String , nullable=True)
-    l1_material = Column(String , nullable=True)
-    l1_fabrication_method = Column(String , nullable=True)
-    l1_thickness = Column(Float , nullable=True)
+class EncapsulationProcedure(Base):
     
+    __tablename__ = "encapsulation_procedures"
 
-    # Layer 2
-    l2_function = Column(String , nullable=True)
-    l2_material = Column(String , nullable=True)
-    l2_fabrication_method = Column(String , nullable=True)
-    l2_thickness = Column(Float , nullable=True)
-    
-
-    # Layer 3
-    l3_function = Column(String , nullable = True)
-    l3_material = Column(String , nullable=True)
-    l3_fabrication_method = Column(String)
-    l3_thickness = Column(Float , nullable=True)
-    
-
-    # Layer 4
-    l4_function = Column(String , nullable=True)
-    l4_material = Column(String , nullable=True)
-    l4_fabrication_method = Column(String , nullable=True)
-    l4_thickness = Column(Float , nullable=True)
-    
-    l4_ratio = Column(String , nullable=True)
-    Processing_solvent = Column(String , nullable=True)
-    Additive_1 = Column(String , nullable=True)
-    Additive_1_concentration  = Column(Float , nullable=True)
-    Additive_2   = Column(String , nullable=True)
-    Additive_2_concentration = Column(Float , nullable=True)
-    Active_layer_treatment_from_processing =  Column(String , nullable=True)
-    # Time since solution was prepared
-    # Solution concentration
-    # Solution temperature
-    # Relative humidity during processing
-    # "When was thermal annealing done 
-    # (pre-deposition, post-deposition, post-sealing, none)"
-    # Annealing temperature
-    # Annealing time
-    # Solvent vapor annealing
-    # Solvent used
-    # Solvent annealing time
-    # Antisolvent treatment (yes/no)
-    # Antisolvent (if used)
-    # Treatment Time (if used)
-    # Removal of Antisolvent (if used)
-
-    # Layer 5
-    l5_function = Column(String , nullable=True)
-    l5_material = Column(String , nullable=True)
-    l5_fabrication_method = Column(String , nullable=True)
-    l5_thickness = Column(Float , nullable=True)
-    
-    # Processing solvent
-    # Additive 1
-    # Additive 1 concentration
-    # Additive 2
-    # Additive 2 concentration
-    # Additive 3
-    # Additive 3 concentration
-    # Time since solution was prepared
-    # Solution concentration
-    # Solution temperature
-    # "When was thermal annealing done 
-    # (pre-deposition, post-deposition, post-sealing, none)"
-    # Annealing temperature
-    # Annealing time
-    # Antisolvent treatment (yes/no)
-
-
-    # Layer 6
-    l6_function = Column(String , nullable=True)
-    l6_material = Column(String , nullable=True)
-    l6_fabrication_method = Column(String , nullable=True)
-    l6_thickness = Column(Float , nullable=True)
-    
-    # Growth rate 1
-    # Growth rate 2
-    # Base pressure
-    # Substrate temperature
-    # Co-deposition (yes/no)
-    # Ratio (if co-deposited)
-    # Annealing temperature (if used)
-    # Annealing solvent (if used)  
-    # Annealing time (if used)
-
-    extra_description = Column(String)
+    id = Column(Integer , primary_key=True )
+    name = Column(String(20) , nullable = True)
+    pressure = Column(Float , nullable = True)
+    kapton_in_gb = Column(Boolean)
+    encapsulation_in_gb = Column(Boolean)
+    encapsulation_material = Column(String)
 
 
 # Base.metadata.drop_all(engine)
